@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Properties>
+		<Property name="PID">????</Property>
+		<Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+		<Property name="LOG_LEVEL_PATTERN">%5p</Property>
+		<Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+		<Property name="CONSOLE_LOG_PATTERN">%clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}
+		</Property>
+		<Property name="FILE_LOG_PATTERN">%d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+		<Property name="Log_Home">DlyUpgServerLogs</Property>
+	</Properties>
+	<Appenders>
+		<!-- 定义控制台输出格式 -->
+		<Console name="Console" target="SYSTEM_OUT" follow="true">
+			<PatternLayout pattern="${sys:CONSOLE_LOG_PATTERN}" />
+			<filters>
+				<!-- 打印 warn+ -->
+				<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
+			</filters>
+		</Console>
+		<!-- 定义CoreWarn为名的文件和输出内容格式 -->
+		<RollingFile name="CoreWarn" fileName="${Log_Home}/coreWarn.${date:yyyy-MM-dd}.log" filePattern="${Log_Home}/$${date:yyyy-MM}/warn-%d{MM-dd-yyyy}-%i.log.gz">
+			<PatternLayout pattern="${FILE_LOG_PATTERN}" />
+			<filters>
+				<!-- 打印 warn+ -->
+				<ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY" />
+			</filters>
+			<Policies>
+				<TimeBasedTriggeringPolicy modulate="true" interval="1" />
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
+		</RollingFile>
+		<!-- 定义CoreDebug为名的文件和输出内容格式 -->
+		<RollingFile name="CoreDebug" fileName="${Log_Home}/coreDebug.${date:yyyy-MM-dd}.log" filePattern="${Log_Home}/$${date:yyyy-MM}/debug-%d{MM-dd-yyyy}-%i.log.gz">
+			<PatternLayout pattern="${FILE_LOG_PATTERN}" />
+			<filters>
+				<!-- 打印info- -->
+				<ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY" />
+			</filters>
+			<Policies>
+				<TimeBasedTriggeringPolicy modulate="true" interval="1" />
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<!-- 全部info级别以上日志,默认配置 -->
+		<Root level="info">
+			<!-- <AppenderRef ref="Console" /> -->
+			<AppenderRef ref="Console" />
+		</Root>
+		<!-- 业务代码日志 -->
+		<Logger name="com.note" level="debug">
+			<!-- additivity="false" -->
+			<AppenderRef ref="CoreWarn" />
+			<AppenderRef ref="CoreDebug" />
+		</Logger>
+	</Loggers>
+</Configuration>
